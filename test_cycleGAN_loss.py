@@ -28,11 +28,11 @@ def get_image_new(image_path,width,height):
 """
 Function to test CycleGAN for test images. 
 """
-def test(cgan_net,testA,testB,model_dir,input_shape,loss_type,image_shape):
+def test(cgan_net,num,testA,testB,model_dir,input_shape,loss_type,image_shape):
     
-    # 改
-    path_imgA = 'test/imageA/'
-    path_imgB = 'test/imageB/'
+
+    path_imgA = model_dir+'/'+testA + '/'
+    path_imgB = model_dir+'/'+testB + '/'
     saver = tf.train.Saver()
 #    tf.reset_default_graph()
 #    tf.train.latest_checkpoint(model_dir)
@@ -42,7 +42,7 @@ def test(cgan_net,testA,testB,model_dir,input_shape,loss_type,image_shape):
         sess.run(tf.global_variables_initializer())
         
         saver.restore(sess,ckpt.model_checkpoint_path)
-        for j in range(1,11):
+        for j in range(1,num + 1):
             testA = path_imgA+str(j)+'.png'
             testB = path_imgB+str(j)+'.png'
             imgA = np.reshape(get_image_new(testA,input_shape[0],input_shape[1]),(1,input_shape[0],input_shape[1],input_shape[2]))
@@ -87,7 +87,7 @@ def main(_):
                 print ("CycleGAN model is not available at the specified path")               
             else:
                 print ('successful')
-                image_shape = [256,64]
+                image_shape = [FLAGS.length,FLAGS.width]
                 input_shape = 128, 128,3
                 batch_size = 1
                 pool_size = 50 
@@ -96,10 +96,13 @@ def main(_):
                 tf.reset_default_graph()
                 
                 cgan_net = CycleGAN(batch_size,input_shape,pool_size,beta1,loss_type)
-                test(cgan_net,FLAGS.testA_image,FLAGS.testB_image,FLAGS.model_dir,input_shape,loss_type,image_shape)       
+                test(cgan_net,FLAGS.num,FLAGS.testA_image,FLAGS.testB_image,FLAGS.model_dir,input_shape,loss_type,image_shape)       
 
 
 flags = tf.app.flags
+flags.DEFINE_integer("width",64,"Test the width of the image")
+flags.DEFINE_integer("length",256,"Test the length of the image")
+flags.DEFINE_integer("num",1,"Total number of images")
 flags.DEFINE_string("testA_image",None,"TestA Image Path")
 flags.DEFINE_string("testB_image",None,"TestB Image Path")
 flags.DEFINE_string("model_dir",None,"Path to checkpoint folder")
